@@ -1,5 +1,8 @@
 package com.projectmaxwell.exception;
 
+import org.codehaus.jackson.annotate.JsonPropertyOrder;
+
+@JsonPropertyOrder({"errorId","errorCode","errorMessage"})
 public class MaxwellException {
 
 	protected String errorId;

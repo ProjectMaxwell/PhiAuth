@@ -2,5 +2,7 @@ package com.projectmaxwell.phiauth.model;
 
 public enum GrantType{
 	PASSWORD,
-	REFRESH
+	REFRESH,
+	ASSERTION,
+	CLIENT_CREDENTIALS
 }

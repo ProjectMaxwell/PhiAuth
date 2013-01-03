@@ -7,8 +7,6 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 
-import com.projectmaxwell.exception.InvalidLoginException;
-import com.projectmaxwell.exception.UndefinedGrantTypeException;
 import com.projectmaxwell.phiauth.model.TokenRequest;
 import com.projectmaxwell.phiauth.model.TokenResponse;
 import com.projectmaxwell.phiauth.service.dao.TokenDAO;
@@ -36,4 +34,5 @@ public class TokenResource {
 	public TokenResponse validateToken(@PathParam("access_token") String accessToken){
 		return tokenDAO.validateToken(accessToken);
 	}
+	
 }

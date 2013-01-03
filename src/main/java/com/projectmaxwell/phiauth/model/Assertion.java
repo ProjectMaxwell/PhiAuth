@@ -1,4 +1,4 @@
-package com.projectmaxwell.phiauth.model.validation;
+package com.projectmaxwell.phiauth.model;
 
 public class Assertion {
 

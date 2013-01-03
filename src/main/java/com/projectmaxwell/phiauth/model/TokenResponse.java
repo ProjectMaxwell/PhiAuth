@@ -1,5 +1,8 @@
 package com.projectmaxwell.phiauth.model;
 
+import org.codehaus.jackson.map.annotate.JsonSerialize;
+
+@JsonSerialize(include=JsonSerialize.Inclusion.NON_NULL)
 public class TokenResponse {
 	
 	private String accessToken;
@@ -8,6 +11,8 @@ public class TokenResponse {
 	private String[] scopes;
 	private GrantType grantType;
 	private int userId;
+	private String clientId;
+	private AssertionType assertionType;
 	
 	public String getAccessToken() {
 		return accessToken;
@@ -55,5 +60,21 @@ public class TokenResponse {
 
 	public void setUserId(int userId) {
 		this.userId = userId;
+	}
+
+	public String getClientId() {
+		return clientId;
+	}
+
+	public void setClientId(String clientId) {
+		this.clientId = clientId;
+	}
+
+	public AssertionType getAssertionType() {
+		return assertionType;
+	}
+
+	public void setAssertionType(AssertionType assertionType2) {
+		this.assertionType = assertionType2;
 	}
 }

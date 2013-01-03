@@ -35,10 +35,10 @@ public class DatasourceConnection {
 	
 	public static void initDatasource() {         
 		PoolProperties p = new PoolProperties();         
-		p.setUrl("jdbc:mysql://HOSTNAMEGOESHERE/maxwell");        
+		p.setUrl("");        
 		p.setDriverClassName("com.mysql.jdbc.Driver");        
-		p.setUsername("USERNAMEGOESHERE");        
-		p.setPassword("PASSWORDGOESHERE");         
+		p.setUsername("");        
+		p.setPassword("");        
 		p.setJmxEnabled(true);       
 		p.setTestWhileIdle(false);        
 		p.setTestOnBorrow(true);        

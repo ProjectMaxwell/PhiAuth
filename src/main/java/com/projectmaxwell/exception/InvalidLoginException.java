@@ -12,8 +12,5 @@ public class InvalidLoginException extends WebApplicationException {
 		super(Response.status(Response.Status.UNAUTHORIZED).entity(
 				new MaxwellException(errorId, errorCode, errorMessage))
 				.build()); 
-		/*super(errorId, errorMessage);
-		this.errorId = errorId;
-		this.errorMessage = errorMessage;*/
 	}
 }

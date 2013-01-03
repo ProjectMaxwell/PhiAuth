@@ -1,6 +1,10 @@
 package com.projectmaxwell.phiauth.model;
 
-import com.projectmaxwell.phiauth.model.validation.Assertion;
+import org.codehaus.jackson.annotate.JsonProperty;
+
+import com.projectmaxwell.exception.UndefinedAssertionTypeException;
+import com.projectmaxwell.exception.UndefinedGrantTypeException;
+
 
 
 public class TokenRequest {
@@ -22,6 +26,16 @@ public class TokenRequest {
 	public void setAssertionType(AssertionType assertionType) {
 		this.assertionType = assertionType;
 	}
+	
+	@JsonProperty("assertionType")
+	public void setAssertionType(String assertionType){
+		try{
+			this.assertionType = AssertionType.valueOf(assertionType);
+		}catch(Exception e){
+			throw new UndefinedAssertionTypeException(String.valueOf(Math.random()),
+					"Requested assertion type '" + assertionType + " is not a valid assertion type");
+		}
+	}
 
 	public GrantType getGrantType() {
 		return grantType;
@@ -29,6 +43,16 @@ public class TokenRequest {
 
 	public void setGrantType(GrantType grantType) {
 		this.grantType = grantType;
+	}
+	
+	@JsonProperty("grantType")
+	public void setGrantType(String grantType){
+		try{
+			this.grantType = GrantType.valueOf(grantType);
+		}catch(Exception e){
+			throw new UndefinedGrantTypeException(String.valueOf(Math.random()),
+					"Requested grant type '" + grantType + " is not a valid grant type");
+		}
 	}
 
 	public String getUsername() {
