@@ -4,6 +4,7 @@ import java.sql.CallableStatement;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Types;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.UUID;
@@ -18,6 +19,7 @@ import com.projectmaxwell.exception.UWNetIDException;
 import com.projectmaxwell.exception.UndefinedAssertionTypeException;
 import com.projectmaxwell.exception.UndefinedGrantTypeException;
 import com.projectmaxwell.phiauth.model.GrantType;
+import com.projectmaxwell.phiauth.model.AssertionType;
 import com.projectmaxwell.phiauth.model.TokenRequest;
 import com.projectmaxwell.phiauth.model.TokenResponse;
 import com.projectmaxwell.phiauth.service.dao.TokenDAO;
@@ -113,7 +115,7 @@ public class TokenDAOImpl extends AbstractMySQLDAOImpl implements TokenDAO{
 			
 			
 			applyUserScopes(tokenResponse);
-			authorizeUser(tokenResponse);
+			createTokens(tokenResponse);
 		}catch(SQLException sqle){
 			throw new WebApplicationException(sqle);
 		}finally{
@@ -132,15 +134,29 @@ public class TokenDAOImpl extends AbstractMySQLDAOImpl implements TokenDAO{
 		tokenResponse.setClientId(tokenRequest.getClientId());
 		
 		try {
-			CallableStatement call = con.prepareCall("CALL remove_refresh_token(?)");
+			CallableStatement call = con.prepareCall("CALL remove_refresh_token(?,?)");
 			call.setString(1, tokenRequest.getRefreshToken());
+			call.setString(2, tokenRequest.getClientId());
 			ResultSet result = call.executeQuery();
 			
 			if(result.next()){
 				tokenResponse.setUserId(result.getInt("user_id"));
+				tokenResponse.setGrantType(GrantType.valueOf(result.getString("grant_type_name")));
+				String assertionTypeName = result.getString("assertion_type_name");
+				if(assertionTypeName != null){
+					tokenResponse.setAssertionType(AssertionType.valueOf(assertionTypeName));
+				}
 				
-				applyUserScopes(tokenResponse);
-				authorizeUser(tokenResponse);
+				//Initialize array and do the first scope
+				HashSet<String> scopes = new HashSet<String>();
+				scopes.add(result.getString("scope_name"));
+				//Iterate over the rest of the results
+				while(result.next()){
+					scopes.add(result.getString("scope_name"));
+				}
+				tokenResponse.setScopes(scopes.toArray(new String[scopes.size()]));
+				
+				createTokens(tokenResponse);
 			}else{
 				throw new InvalidTokenException(String.valueOf(Math.random())
 						,"Token '" + tokenRequest.getRefreshToken() + "' is either expired or invalid.");
@@ -166,6 +182,7 @@ public class TokenDAOImpl extends AbstractMySQLDAOImpl implements TokenDAO{
 			if(result.next()){
 //				tokenResponse.setUserId(1);
 //				authorizeUser(tokenResponse);
+				createTokens(tokenResponse);
 			}else{
 				throw new InvalidTokenException(String.valueOf(Math.random())
 						,"Token '" + tokenRequest.getRefreshToken() + "' is either expired or invalid.");
@@ -248,7 +265,7 @@ public class TokenDAOImpl extends AbstractMySQLDAOImpl implements TokenDAO{
 
 		try {
 			applyUserScopes(tokenResponse);
-			authorizeUser(tokenResponse);
+			createTokens(tokenResponse);
 		} catch (SQLException sqle) {
 			throw new InvalidTokenRequestException(String.valueOf(Math.random()),
 					"Could not create auth token for UWNetID assertion due to exception.  " + sqle.getMessage());
@@ -294,39 +311,48 @@ public class TokenDAOImpl extends AbstractMySQLDAOImpl implements TokenDAO{
 		tokenResponse.setScopes(scopes.toArray(new String[scopes.size()]));
 	}
 
-	private void authorizeUser(TokenResponse tokenResponse) throws SQLException {
+	private void createTokens(TokenResponse tokenResponse) throws SQLException {
 		CallableStatement call;
 		
-/*		HashSet<String> scopes = new HashSet<String>();	
-		call = con.prepareCall("CALL get_client_scopes(?)");
-		call.setString(1, tokenResponse.getClientId());
-		ResultSet result = call.executeQuery();
-		while(result.next()){
-			scopes.add(result.getString("scope_name"));
-		}*/
-		
-/*		call = con.prepareCall("CALL get_scopes_for_user(?)");
-		call.setInt(1, tokenResponse.getUserId());
-		result = call.executeQuery();
-		while(result.next()){
-			scopes.add(result.getString("scope_name"));
-		}*/
-		
-		/*tokenResponse.setScopes(scopes.toArray(new String[scopes.size()]));*/
-		
-//		applyUserScopes(tokenResponse);
 		applyClientScopes(tokenResponse);
 		
 		tokenResponse.setAccessToken(UUID.randomUUID().toString());
 		tokenResponse.setRefreshToken(UUID.randomUUID().toString());
 		tokenResponse.setTtl(7200);
 		
-		PreparedStatement stmt = con.prepareStatement("CALL create_tokens_for_user(?,?,?,?)");
+/*		PreparedStatement stmt = con.prepareStatement("CALL create_tokens_for_user(?,?,?,?)");
 		stmt.setInt(1, tokenResponse.getUserId());
 		stmt.setString(2, tokenResponse.getAccessToken());
 		stmt.setString(3, tokenResponse.getRefreshToken());
 		stmt.setInt(4,tokenResponse.getTtl());
+		stmt.execute();*/
+		
+
+//		CREATE ME AND DEPRECATE ABOVE
+  		PreparedStatement stmt = con.prepareStatement("CALL create_tokens(?,?,?,?,?,?,?)");
+		stmt.setString(1, tokenResponse.getAccessToken());
+		stmt.setString(2, tokenResponse.getRefreshToken());
+		if(tokenResponse.getUserId() == 0){
+			stmt.setNull(3, Types.INTEGER);
+		}else{
+			stmt.setInt(3, tokenResponse.getUserId());
+		}
+		stmt.setString(4, tokenResponse.getClientId());
+		stmt.setString(5, tokenResponse.getGrantType().name());
+		if(tokenResponse.getAssertionType() != null){
+			stmt.setString(6, tokenResponse.getAssertionType().name());
+		}else{
+			stmt.setNull(6, Types.VARCHAR);
+		}
+		stmt.setInt(7,tokenResponse.getTtl());
 		stmt.execute();
+		
+		for(String scope : tokenResponse.getScopes()){
+			stmt = con.prepareStatement("CALL add_scope_to_access_token(?,?)");
+			stmt.setString(1, tokenResponse.getAccessToken());
+			stmt.setString(2, scope);
+			stmt.execute();
+		}
 	}
 
 	@Override
@@ -339,6 +365,13 @@ public class TokenDAOImpl extends AbstractMySQLDAOImpl implements TokenDAO{
 			if(result.next()){
 				tr.setAccessToken(accessToken);
 				tr.setUserId(result.getInt("user_id"));
+				tr.setClientId(result.getString("client_id"));
+				tr.setGrantType(GrantType.valueOf(result.getString("grant_type_name")));	
+				String assertionTypeName = result.getString("assertion_type_name");
+				if(assertionTypeName != null){
+					tr.setAssertionType(AssertionType.valueOf(assertionTypeName));
+				}		
+				
 				//Initialize array and do the first scope
 				HashSet<String> scopes = new HashSet<String>();
 				scopes.add(result.getString("scope_name"));
@@ -350,7 +383,7 @@ public class TokenDAOImpl extends AbstractMySQLDAOImpl implements TokenDAO{
 			}
 			
 		} catch (SQLException sqle) {
-			throw new WebApplicationException(sqle);
+			throw new InvalidTokenException(String.valueOf(Math.random()),"Could not validate token due to exception.");
 		}
 		
 		return tr;
