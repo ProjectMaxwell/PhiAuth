@@ -7,8 +7,6 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 
-import com.projectmaxwell.exception.InvalidTokenException;
-import com.projectmaxwell.phiauth.model.TokenResponse;
 import com.projectmaxwell.phiauth.model.uwnetid.UWNetIDTokenRequest;
 import com.projectmaxwell.phiauth.model.uwnetid.UWNetIDTokenResponse;
 import com.projectmaxwell.phiauth.service.dao.TokenDAO;

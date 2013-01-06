@@ -312,21 +312,12 @@ public class TokenDAOImpl extends AbstractMySQLDAOImpl implements TokenDAO{
 	}
 
 	private void createTokens(TokenResponse tokenResponse) throws SQLException {
-		CallableStatement call;
 		
 		applyClientScopes(tokenResponse);
 		
 		tokenResponse.setAccessToken(UUID.randomUUID().toString());
 		tokenResponse.setRefreshToken(UUID.randomUUID().toString());
 		tokenResponse.setTtl(7200);
-		
-/*		PreparedStatement stmt = con.prepareStatement("CALL create_tokens_for_user(?,?,?,?)");
-		stmt.setInt(1, tokenResponse.getUserId());
-		stmt.setString(2, tokenResponse.getAccessToken());
-		stmt.setString(3, tokenResponse.getRefreshToken());
-		stmt.setInt(4,tokenResponse.getTtl());
-		stmt.execute();*/
-		
 
 //		CREATE ME AND DEPRECATE ABOVE
   		PreparedStatement stmt = con.prepareStatement("CALL create_tokens(?,?,?,?,?,?,?)");

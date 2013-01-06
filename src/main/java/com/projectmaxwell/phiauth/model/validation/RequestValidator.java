@@ -39,7 +39,6 @@ public class RequestValidator {
 	
 	public boolean validateAssertionRequest(TokenRequest tokenRequest){
 		String clientId = tokenRequest.getClientId();
-		String clientSecret = tokenRequest.getClientSecret();
 		AssertionType assertionType = tokenRequest.getAssertionType();
 		Assertion assertion = tokenRequest.getAssertion();
 		
