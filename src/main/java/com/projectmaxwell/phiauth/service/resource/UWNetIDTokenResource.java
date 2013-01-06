@@ -33,7 +33,7 @@ public class UWNetIDTokenResource extends AbstractResource {
 	@POST
 	@RolesAllowed({"generate_uwnetid_token"})
 	public UWNetIDTokenResponse createToken(UWNetIDTokenRequest tokenRequest, @HeaderParam("Authorization") String token){
-		TokenResponse validationResponse;
+		/*		TokenResponse validationResponse;
 		try {
 			validationResponse = tokenDAO.validateToken(token);
 		} catch(Exception e){
@@ -41,7 +41,7 @@ public class UWNetIDTokenResource extends AbstractResource {
 					"Could not validate token.");
 		}
 		String[] allowedScopes = {"generate_uwnetid_token"};
-		hasScope(validationResponse, allowedScopes);
+		hasScope(validationResponse, allowedScopes);*/
 		return uwnetidTokenDAO.createToken(tokenRequest);
 	}
 }
