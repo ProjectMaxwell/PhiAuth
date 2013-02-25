@@ -10,9 +10,10 @@ public class TokenResponse {
 	private int ttl;
 	private String[] scopes;
 	private GrantType grantType;
-	private int userId;
+	private Integer userId;
 	private String clientId;
 	private AssertionType assertionType;
+	private Integer userTypeId;
 	
 	public String getAccessToken() {
 		return accessToken;
@@ -54,7 +55,7 @@ public class TokenResponse {
 		this.grantType = grantType;
 	}
 	
-	public int getUserId() {
+	public Integer getUserId() {
 		return userId;
 	}
 
@@ -76,5 +77,13 @@ public class TokenResponse {
 
 	public void setAssertionType(AssertionType assertionType2) {
 		this.assertionType = assertionType2;
+	}
+
+	public Integer getUserTypeId() {
+		return userTypeId;
+	}
+
+	public void setUserTypeId(int userType) {
+		this.userTypeId = userType;
 	}
 }

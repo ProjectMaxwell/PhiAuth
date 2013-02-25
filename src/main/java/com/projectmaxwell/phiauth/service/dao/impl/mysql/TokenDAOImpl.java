@@ -11,6 +11,8 @@ import java.util.UUID;
 
 import javax.ws.rs.WebApplicationException;
 
+import org.objectweb.asm.Type;
+
 import com.projectmaxwell.exception.InvalidAssertionException;
 import com.projectmaxwell.exception.InvalidLoginException;
 import com.projectmaxwell.exception.InvalidTokenException;
@@ -320,7 +322,7 @@ public class TokenDAOImpl extends AbstractMySQLDAOImpl implements TokenDAO{
 		tokenResponse.setTtl(7200);
 
 //		CREATE ME AND DEPRECATE ABOVE
-  		PreparedStatement stmt = con.prepareStatement("CALL create_tokens(?,?,?,?,?,?,?)");
+  		PreparedStatement stmt = con.prepareStatement("CALL create_tokens(?,?,?,?,?,?,?,?)");
 		stmt.setString(1, tokenResponse.getAccessToken());
 		stmt.setString(2, tokenResponse.getRefreshToken());
 		if(tokenResponse.getUserId() == 0){
@@ -336,6 +338,11 @@ public class TokenDAOImpl extends AbstractMySQLDAOImpl implements TokenDAO{
 			stmt.setNull(6, Types.VARCHAR);
 		}
 		stmt.setInt(7,tokenResponse.getTtl());
+		if(tokenResponse.getUserTypeId() != null){
+			stmt.setInt(8, tokenResponse.getUserTypeId());
+		}else{
+			stmt.setNull(8, Type.INT);
+		}
 		stmt.execute();
 		
 		for(String scope : tokenResponse.getScopes()){
