@@ -325,7 +325,7 @@ public class TokenDAOImpl extends AbstractMySQLDAOImpl implements TokenDAO{
   		PreparedStatement stmt = con.prepareStatement("CALL create_tokens(?,?,?,?,?,?,?,?)");
 		stmt.setString(1, tokenResponse.getAccessToken());
 		stmt.setString(2, tokenResponse.getRefreshToken());
-		if(tokenResponse.getUserId() == 0){
+		if(tokenResponse.getUserId() == null || tokenResponse.getUserId() == 0){
 			stmt.setNull(3, Types.INTEGER);
 		}else{
 			stmt.setInt(3, tokenResponse.getUserId());
