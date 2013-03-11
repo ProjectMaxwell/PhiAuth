@@ -71,8 +71,9 @@ public class TokenDAOImpl extends AbstractMySQLDAOImpl implements TokenDAO{
 				call.setString(3, null);
 			}
 		} catch(SQLException sqle){
+			releaseConnection();
 			throw new WebApplicationException(sqle);
-		}		
+		}	
 		
 		try{
 			ResultSet result = call.executeQuery();
@@ -166,6 +167,8 @@ public class TokenDAOImpl extends AbstractMySQLDAOImpl implements TokenDAO{
 			return tokenResponse;
 		} catch (SQLException sqle) {
 			throw new WebApplicationException(sqle);
+		}finally{
+			releaseConnection();
 		}
 	}
 	
@@ -192,6 +195,8 @@ public class TokenDAOImpl extends AbstractMySQLDAOImpl implements TokenDAO{
 			return tokenResponse;
 		} catch (SQLException sqle) {
 			throw new WebApplicationException(sqle);
+		}finally{
+			releaseConnection();
 		}
 	}
 
@@ -234,6 +239,7 @@ public class TokenDAOImpl extends AbstractMySQLDAOImpl implements TokenDAO{
 				externalId = result.getString("uwnetid");
 			}
 		} catch (SQLException sqle) {
+			releaseConnection();
 			throw new InvalidAssertionException(String.valueOf(Math.random()),
 					"Could not lookup uwnetid for uwnetid token.");
 		}
@@ -262,6 +268,7 @@ public class TokenDAOImpl extends AbstractMySQLDAOImpl implements TokenDAO{
 				throw new InvalidAssertionException(String.valueOf(Math.random()),
 						"Could not lookup user in unknown external system.");
 			}
+			releaseConnection();
 		}
 		
 
@@ -271,6 +278,8 @@ public class TokenDAOImpl extends AbstractMySQLDAOImpl implements TokenDAO{
 		} catch (SQLException sqle) {
 			throw new InvalidTokenRequestException(String.valueOf(Math.random()),
 					"Could not create auth token for UWNetID assertion due to exception.  " + sqle.getMessage());
+		}finally{
+			releaseConnection();
 		}
 		return tokenResponse;
 	}
@@ -382,6 +391,8 @@ public class TokenDAOImpl extends AbstractMySQLDAOImpl implements TokenDAO{
 			
 		} catch (SQLException sqle) {
 			throw new InvalidTokenException(String.valueOf(Math.random()),"Could not validate token due to exception.");
+		}finally{
+			releaseConnection();
 		}
 		
 		return tr;
